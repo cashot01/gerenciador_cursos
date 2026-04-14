@@ -1,4 +1,4 @@
-from pessoa import Pessoa
+from models.pessoa import Pessoa
 
 class Aluno(Pessoa):
     _contador_matricula = 1000
@@ -14,10 +14,10 @@ class Aluno(Pessoa):
             raise ValueError("Nota deve estar entre 0 e 10")
         self.notas.append(nota)
 
-    def caucular_media(self) -> float:
+    def calcular_media(self) -> float:
         return sum(self.notas) / len(self.notas) if self.notas else 0.0
     
     def __str__(self):
-        return f"[{self.matricula}] {super().__str__()} | Media: {self.caucular_media():.1f}"
+        return f"[{self.matricula}] {super().__str__()} | Media: {self.calcular_media():.1f}"
     
     

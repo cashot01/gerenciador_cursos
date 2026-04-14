@@ -1,6 +1,6 @@
 
-from aluno import Aluno
-from professor import Professor
+from models.aluno import Aluno
+from models.professor import Professor
 
 class Curso:
     def __init__(self, codigo: str, nome: str, carga_horaria: int, professor: Professor):
