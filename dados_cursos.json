@@ -1,0 +1,25 @@
+{
+  "cursos": [
+    {
+      "codigo": "PY101",
+      "nome": "Python Basico",
+      "carga_horaria": 40,
+      "professor": {
+        "nome": "Ana Silva",
+        "email": "ana@escola.com",
+        "especialidade": "Python & Dados",
+        "disciplinas": []
+      },
+      "alunos": [
+        {
+          "nome": "Carlos Souza",
+          "email": "carlos@email.com",
+          "matricula": "M1000",
+          "notas": [
+            8.5
+          ]
+        }
+      ]
+    }
+  ]
+}

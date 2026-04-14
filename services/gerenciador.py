@@ -1,10 +1,12 @@
-
+import json
+import os
 from typing import List, Optional
 from models.curso import Curso
 from models.aluno import Aluno
 
 class GerenciadorCursos:
-    _cursos: list[Curso] = []
+    _cursos: List[Curso] = []
+    ARQUIVO_PADRAO = "dados_cursos.json"
 
     @classmethod
     def adicionar_curso(cls, curso: Curso):
@@ -16,14 +18,14 @@ class GerenciadorCursos:
             if curso.codigo == codigo.upper():
                 return curso
         return None
-    
+
     @staticmethod
     def buscar_aluno_por_matricula(alunos: List[Aluno], matricula: str) -> Optional[Aluno]:
         for aluno in alunos:
             if aluno.matricula == matricula:
                 return aluno
         return None
-    
+
     @classmethod
     def gerar_relatorio_turmas(cls) -> str:
         if not cls._cursos:
@@ -40,3 +42,21 @@ class GerenciadorCursos:
                 relatorio += "  Sem alunos matriculados.\n"
             relatorio += "-"*35 + "\n"
         return relatorio
+
+    @classmethod
+    def salvar_dados(cls, caminho: str = None) -> str:
+        path = caminho or cls.ARQUIVO_PADRAO
+        dados = {"cursos": [curso.to_dict() for curso in cls._cursos]}
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(dados, f, indent=2, ensure_ascii=False)
+        return path
+
+    @classmethod
+    def carregar_dados(cls, caminho: str = None) -> bool:
+        path = caminho or cls.ARQUIVO_PADRAO
+        if not os.path.exists(path):
+            return False
+        with open(path, "r", encoding="utf-8") as f:
+            dados = json.load(f)
+        cls._cursos = [Curso.from_dict(c) for c in dados.get("cursos", [])]
+        return True
