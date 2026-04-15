@@ -16,8 +16,8 @@
           "email": "carlos@email.com",
           "matricula": "M1000",
           "notas": [
-            5.6,
-            10.0
+            5.5,
+            6.5
           ]
         },
         {
@@ -25,7 +25,8 @@
           "email": "luiza@aluno.com",
           "matricula": "M1000",
           "notas": [
-            9.5
+            7.9,
+            2.5
           ]
         }
       ]

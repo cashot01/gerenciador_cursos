@@ -62,12 +62,13 @@ def menu_principal() -> int:
         "6. 📊 Adicionar Nota a Aluno",
         "7. 🔍 Listar Todos os Cursos",
         "8. 📈 Gerar Relatório de Turmas",
-        "9. 💾 Salvar Dados Manualmente",
-        "10. 🚪 Sair (Salva automaticamente)"
+        "9. 📤 Exportar Relatório para CSV",
+        "10. 💾 Salvar Dados Manualmente",
+        "11. 🚪 Sair (Salva automaticamente)"
     ]
     for op in opcoes:
         console.print(f"  • {op}")
-    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]", default=10)
+    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]")
 
 def menu_professores(professores: list[Professor]) -> int:
     console.print(Panel("[bold blue]👨‍🏫 Gerenciar Professores[/bold blue]", border_style="blue"))
@@ -80,7 +81,7 @@ def menu_professores(professores: list[Professor]) -> int:
     ]
     for op in opcoes:
         console.print(f"  • {op}")
-    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]", default=5)
+    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]")
 
 def menu_alunos(alunos: list[Aluno]) -> int:
     console.print(Panel("[bold green]👨‍🎓 Gerenciar Alunos[/bold green]", border_style="green"))
@@ -93,7 +94,7 @@ def menu_alunos(alunos: list[Aluno]) -> int:
     ]
     for op in opcoes:
         console.print(f"  • {op}")
-    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]", default=5)
+    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]")
 
 def menu_cursos() -> int:
     console.print(Panel("[bold magenta]📚 Gerenciar Cursos[/bold magenta]", border_style="magenta"))
@@ -106,7 +107,7 @@ def menu_cursos() -> int:
     ]
     for op in opcoes:
         console.print(f"  • {op}")
-    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]", default=5)
+    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]")
 
 # ============================================================================
 # CRUD PROFESSOR
@@ -499,6 +500,44 @@ def gerar_relatorio():
         relatorio = GerenciadorCursos.gerar_relatorio_turmas()
     console.print(Markdown(relatorio))
 
+def exportar_csv():
+    cursos = GerenciadorCursos._cursos
+    if not cursos:
+        console.print("  ⚠️ [yellow]Nenhum curso cadastrado para exportar.[/yellow]")
+        return
+    
+    console.print(Panel("📤 [bold]Exportar Relatório para CSV[/bold]", border_style="green"))
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True
+    ) as progress:
+        task = progress.add_task("Exportando dados...", total=None)
+        
+        try:
+            caminho = GerenciadorCursos.exportar_relatorio_csv()
+            progress.update(task, completed=True)
+            
+            # Contar dados exportados
+            total_alunos = sum(len(c.alunos) for c in cursos)
+            total_cursos = len(cursos)
+            
+            console.print(Panel(
+                f"[bold green]✅ Exportação concluída com sucesso![/bold green]\n\n"
+                f"📁 Arquivo: [cyan]{caminho}[/cyan]\n"
+                f"📊 Cursos exportados: [bold]{total_cursos}[/bold]\n"
+                f"👨‍🎓 Total de matrículas: [bold]{total_alunos}[/bold]\n\n"
+                f"[dim]Abra o arquivo no Excel, Google Sheets ou LibreOffice Calc.[/dim]",
+                border_style="green",
+                padding=(1, 2)
+            ))
+        except ValueError as e:
+            console.print(f"  ❌ [red]Erro: {e}[/red]")
+        except Exception as e:
+            console.print(f"  ❌ [red]Erro inesperado: {e}[/red]")
+
 # ============================================================================
 # MAIN
 # ============================================================================
@@ -581,10 +620,13 @@ def main():
             gerar_relatorio()
             voltar_ao_menu()
         elif opcao == 9:
+            exportar_csv()
+            voltar_ao_menu()
+        elif opcao == 10:
             caminho = GerenciadorCursos.salvar_dados()
             console.print(f"💾 [green]Dados salvos em: {caminho}[/green]")
             voltar_ao_menu()
-        elif opcao == 10:
+        elif opcao == 11:
             caminho = GerenciadorCursos.salvar_dados()
             console.print(Panel(f"\n[bold green]👋 Dados salvos em: {caminho}\nObrigado por usar o Sistema de Cursos![/bold green]\n", border_style="green"))
             break

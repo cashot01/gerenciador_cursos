@@ -1,5 +1,6 @@
 import json
 import os
+import csv
 from typing import List, Optional
 from models.curso import Curso
 from models.aluno import Aluno
@@ -7,6 +8,7 @@ from models.aluno import Aluno
 class GerenciadorCursos:
     _cursos: List[Curso] = []
     ARQUIVO_PADRAO = "dados_cursos.json"
+    ARQUIVO_CSV = "relatorio_cursos.csv"
 
     @classmethod
     def adicionar_curso(cls, curso: Curso):
@@ -60,3 +62,73 @@ class GerenciadorCursos:
             dados = json.load(f)
         cls._cursos = [Curso.from_dict(c) for c in dados.get("cursos", [])]
         return True
+    
+    @classmethod
+    def exportar_relatorio_csv(cls, caminho: str = None) -> str:
+        """
+        Exporta relatório completo de cursos, alunos e notas para CSV.
+        Cada linha representa um aluno em um curso com suas notas.
+        """
+        path = caminho or cls.ARQUIVO_CSV
+        
+        if not cls._cursos:
+            raise ValueError("Nenhum curso cadastrado para exportar.")
+        
+        with open(path, "w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.writer(f, delimiter=";")  # Ponto e vírgula para compatibilidade com Excel BR
+            
+            # Cabeçalho
+            writer.writerow([
+                "Código do Curso",
+                "Nome do Curso",
+                "Carga Horária",
+                "Professor",
+                "Especialidade do Professor",
+                "Matrícula do Aluno",
+                "Nome do Aluno",
+                "Email do Aluno",
+                "Notas (separadas por vírgula)",
+                "Quantidade de Notas",
+                "Média Final",
+                "Situação"  # Aprovado/Reprovado baseado na média
+            ])
+            
+            # Dados
+            for curso in cls._cursos:
+                if curso.alunos:
+                    for aluno in curso.alunos:
+                        media = aluno.calcular_media()
+                        situacao = "Aprovado" if media >= 6.0 else "Reprovado" if aluno.notas else "Sem Notas"
+                        
+                        writer.writerow([
+                            curso.codigo,
+                            curso.nome,
+                            f"{curso.carga_horaria}h",
+                            curso.professor.nome,
+                            curso.professor.especialidade,
+                            aluno.matricula,
+                            aluno.nome,
+                            aluno.email,
+                            ", ".join(str(n) for n in aluno.notas),
+                            len(aluno.notas),
+                            f"{media:.2f}" if aluno.notas else "0.00",
+                            situacao
+                        ])
+                else:
+                    # Curso sem alunos - ainda assim exportar
+                    writer.writerow([
+                        curso.codigo,
+                        curso.nome,
+                        f"{curso.carga_horaria}h",
+                        curso.professor.nome,
+                        curso.professor.especialidade,
+                        "—",
+                        "—",
+                        "—",
+                        "—",
+                        "0",
+                        "0.00",
+                        "Sem Alunos"
+                    ])
+        
+        return path
