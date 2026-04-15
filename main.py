@@ -1,7 +1,7 @@
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.prompt import Prompt, IntPrompt, FloatPrompt
+from rich.prompt import Prompt, IntPrompt, FloatPrompt, Confirm
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.markdown import Markdown
 
@@ -11,6 +11,10 @@ from models.curso import Curso
 from services.gerenciador import GerenciadorCursos
 
 console = Console()
+
+# ============================================================================
+# FUNÇÕES AUXILIARES
+# ============================================================================
 
 def extrair_listas_unicas():
     """Extrai professores e alunos únicos de todos os cursos carregados."""
@@ -35,21 +39,28 @@ def limpar_tela():
 def exibir_cabecalho():
     console.print(Panel.fit(
         "🎓 [bold cyan]Sistema de Gerenciamento de Cursos[/bold cyan]\n"
-        "[dim]Python POO + Rich CLI + JSON Persistence[/dim]",
+        "[dim]Python POO + Rich CLI + JSON Persistence + CRUD Completo[/dim]",
         border_style="cyan",
         padding=(1, 2)
     ))
 
+def voltar_ao_menu():
+    Prompt.ask("\n[dim]Pressione Enter para continuar[/dim]")
+
+# ============================================================================
+# MENU PRINCIPAL
+# ============================================================================
+
 def menu_principal() -> int:
     console.print("\n[bold yellow]📋 Menu Principal:[/bold yellow]")
     opcoes = [
-        "1. 👨‍🏫 Cadastrar Professor",
-        "2. 👨‍🎓 Cadastrar Aluno",
-        "3. 📚 Cadastrar Curso",
+        "1. 👨‍🏫 Gerenciar Professores (CRUD)",
+        "2. 👨‍🎓 Gerenciar Alunos (CRUD)",
+        "3. 📚 Gerenciar Cursos (CRUD)",
         "4. 📝 Matricular Aluno em Curso",
         "5. ❌ Desmatricular Aluno",
         "6. 📊 Adicionar Nota a Aluno",
-        "7. 🔍 Listar Cursos",
+        "7. 🔍 Listar Todos os Cursos",
         "8. 📈 Gerar Relatório de Turmas",
         "9. 💾 Salvar Dados Manualmente",
         "10. 🚪 Sair (Salva automaticamente)"
@@ -58,8 +69,51 @@ def menu_principal() -> int:
         console.print(f"  • {op}")
     return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]", default=10)
 
-def cadastrar_professor(professores: list[Professor]):
-    console.print(Panel("👨‍🏫 [bold]Novo Professor[/bold]", border_style="blue"))
+def menu_professores(professores: list[Professor]) -> int:
+    console.print(Panel("[bold blue]👨‍🏫 Gerenciar Professores[/bold blue]", border_style="blue"))
+    opcoes = [
+        "1. ➕ Cadastrar Novo Professor",
+        "2. 👁️ Listar Todos os Professores",
+        "3. ✏️ Editar Professor",
+        "4. 🗑️ Excluir Professor",
+        "5. 🔙 Voltar ao Menu Principal"
+    ]
+    for op in opcoes:
+        console.print(f"  • {op}")
+    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]", default=5)
+
+def menu_alunos(alunos: list[Aluno]) -> int:
+    console.print(Panel("[bold green]👨‍🎓 Gerenciar Alunos[/bold green]", border_style="green"))
+    opcoes = [
+        "1. ➕ Cadastrar Novo Aluno",
+        "2. 👁️ Listar Todos os Alunos",
+        "3. ✏️ Editar Aluno",
+        "4. 🗑️ Excluir Aluno",
+        "5. 🔙 Voltar ao Menu Principal"
+    ]
+    for op in opcoes:
+        console.print(f"  • {op}")
+    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]", default=5)
+
+def menu_cursos() -> int:
+    console.print(Panel("[bold magenta]📚 Gerenciar Cursos[/bold magenta]", border_style="magenta"))
+    opcoes = [
+        "1. ➕ Cadastrar Novo Curso",
+        "2. 👁️ Listar Todos os Cursos",
+        "3. ✏️ Editar Curso",
+        "4. 🗑️ Excluir Curso",
+        "5. 🔙 Voltar ao Menu Principal"
+    ]
+    for op in opcoes:
+        console.print(f"  • {op}")
+    return IntPrompt.ask("\n[bold green]Escolha uma opção[/bold green]", default=5)
+
+# ============================================================================
+# CRUD PROFESSOR
+# ============================================================================
+
+def criar_professor(professores: list[Professor]) -> Professor | None:
+    console.print(Panel("➕ [bold]Novo Professor[/bold]", border_style="blue"))
     nome = Prompt.ask("  Nome")
     email = Prompt.ask("  Email")
     especialidade = Prompt.ask("  Especialidade")
@@ -72,8 +126,78 @@ def cadastrar_professor(professores: list[Professor]):
         console.print(f"  ❌ [red]Erro: {e}[/red]")
         return None
 
-def cadastrar_aluno(alunos: list[Aluno]):
-    console.print(Panel("👨‍🎓 [bold]Novo Aluno[/bold]", border_style="green"))
+def listar_professores(professores: list[Professor]):
+    console.print(Panel("👁️ [bold]Professores Cadastrados[/bold]", border_style="blue"))
+    if not professores:
+        console.print("  📭 [dim]Nenhum professor cadastrado.[/dim]")
+        return
+    table = Table(show_header=True, header_style="bold blue", show_lines=True)
+    table.add_column("#", style="dim", width=3)
+    table.add_column("Nome")
+    table.add_column("Email")
+    table.add_column("Especialidade")
+    for i, p in enumerate(professores, 1):
+        table.add_row(str(i), p.nome, p.email, p.especialidade)
+    console.print(table)
+
+def editar_professor(professores: list[Professor]):
+    if not professores:
+        console.print("  ⚠️ [yellow]Nenhum professor cadastrado.[/yellow]")
+        return
+    listar_professores(professores)
+    idx = IntPrompt.ask("  Selecione o professor para editar", default=1) - 1
+    if not (0 <= idx < len(professores)):
+        console.print("  ❌ [red]Professor inválido[/red]")
+        return
+    prof = professores[idx]
+    console.print(Panel(f"✏️ [bold]Editar: {prof.nome}[/bold]", border_style="yellow"))
+    novo_nome = Prompt.ask("  Nome", default=prof.nome)
+    novo_email = Prompt.ask("  Email", default=prof.email)
+    nova_especialidade = Prompt.ask("  Especialidade", default=prof.especialidade)
+    try:
+        prof.nome = novo_nome
+        prof.email = novo_email  # aciona validação do setter
+        prof.especialidade = nova_especialidade
+        console.print(f"  ✅ [green]Professor atualizado com sucesso![/green]")
+    except ValueError as e:
+        console.print(f"  ❌ [red]Erro: {e}[/red]")
+
+def excluir_professor(professores: list[Professor], cursos: list[Curso]):
+    if not professores:
+        console.print("  ⚠️ [yellow]Nenhum professor cadastrado.[/yellow]")
+        return
+    listar_professores(professores)
+    idx = IntPrompt.ask("  Selecione o professor para excluir", default=1) - 1
+    if not (0 <= idx < len(professores)):
+        console.print("  ❌ [red]Professor inválido[/red]")
+        return
+    prof = professores[idx]
+    
+    # Verificar se professor está vinculado a cursos
+    cursos_vinculados = [c for c in cursos if c.professor.email == prof.email]
+    if cursos_vinculados:
+        console.print(f"  ⚠️ [yellow]Professor possui {len(cursos_vinculados)} curso(s) vinculado(s).[/yellow]")
+        for c in cursos_vinculados:
+            console.print(f"     - {c.codigo}: {c.nome}")
+        if not Confirm.ask("  Deseja excluir mesmo assim? (cursos ficarão sem professor)"):
+            console.print("  ⚪ [dim]Operação cancelada.[/dim]")
+            return
+    
+    if Confirm.ask(f"  Confirmar exclusão de [red]{prof.nome}[/red]?"):
+        professores.remove(prof)
+        # Remover referência dos cursos
+        for curso in cursos_vinculados:
+            curso.professor = Professor("Não informado", "nao@informado.com", "N/A")
+        console.print(f"  ✅ [green]Professor excluído com sucesso![/green]")
+    else:
+        console.print("  ⚪ [dim]Operação cancelada.[/dim]")
+
+# ============================================================================
+# CRUD ALUNO
+# ============================================================================
+
+def criar_aluno(alunos: list[Aluno]) -> Aluno | None:
+    console.print(Panel("➕ [bold]Novo Aluno[/bold]", border_style="green"))
     nome = Prompt.ask("  Nome")
     email = Prompt.ask("  Email")
     try:
@@ -85,11 +209,85 @@ def cadastrar_aluno(alunos: list[Aluno]):
         console.print(f"  ❌ [red]Erro: {e}[/red]")
         return None
 
-def cadastrar_curso(professores: list[Professor]):
+def listar_alunos(alunos: list[Aluno]):
+    console.print(Panel("👁️ [bold]Alunos Cadastrados[/bold]", border_style="green"))
+    if not alunos:
+        console.print("  📭 [dim]Nenhum aluno cadastrado.[/dim]")
+        return
+    table = Table(show_header=True, header_style="bold green", show_lines=True)
+    table.add_column("#", style="dim", width=3)
+    table.add_column("Matrícula", style="cyan")
+    table.add_column("Nome")
+    table.add_column("Email")
+    table.add_column("Média", justify="right")
+    for i, a in enumerate(alunos, 1):
+        table.add_row(str(i), a.matricula, a.nome, a.email, f"{a.calcular_media():.1f}")
+    console.print(table)
+
+def editar_aluno(alunos: list[Aluno]):
+    if not alunos:
+        console.print("  ⚠️ [yellow]Nenhum aluno cadastrado.[/yellow]")
+        return
+    listar_alunos(alunos)
+    idx = IntPrompt.ask("  Selecione o aluno para editar", default=1) - 1
+    if not (0 <= idx < len(alunos)):
+        console.print("  ❌ [red]Aluno inválido[/red]")
+        return
+    aluno = alunos[idx]
+    console.print(Panel(f"✏️ [bold]Editar: {aluno.nome} ({aluno.matricula})[/bold]", border_style="yellow"))
+    novo_nome = Prompt.ask("  Nome", default=aluno.nome)
+    novo_email = Prompt.ask("  Email", default=aluno.email)
+    try:
+        aluno.nome = novo_nome
+        aluno.email = novo_email  # aciona validação do setter
+        console.print(f"  ✅ [green]Aluno atualizado com sucesso![/green]")
+    except ValueError as e:
+        console.print(f"  ❌ [red]Erro: {e}[/red]")
+
+def excluir_aluno(alunos: list[Aluno], cursos: list[Curso]):
+    if not alunos:
+        console.print("  ⚠️ [yellow]Nenhum aluno cadastrado.[/yellow]")
+        return
+    listar_alunos(alunos)
+    idx = IntPrompt.ask("  Selecione o aluno para excluir", default=1) - 1
+    if not (0 <= idx < len(alunos)):
+        console.print("  ❌ [red]Aluno inválido[/red]")
+        return
+    aluno = alunos[idx]
+    
+    # Verificar matrículas ativas
+    matriculas_ativas = []
+    for curso in cursos:
+        if aluno in curso.alunos:
+            matriculas_ativas.append(curso)
+    
+    if matriculas_ativas:
+        console.print(f"  ⚠️ [yellow]Aluno está matriculado em {len(matriculas_ativas)} curso(s):[/yellow]")
+        for c in matriculas_ativas:
+            console.print(f"     - {c.codigo}: {c.nome}")
+        if not Confirm.ask("  Deseja excluir mesmo assim? (será desmatriculado automaticamente)"):
+            console.print("  ⚪ [dim]Operação cancelada.[/dim]")
+            return
+        # Desmatricular automaticamente
+        for curso in matriculas_ativas:
+            curso.desmatricular(aluno)
+        console.print("  📝 [dim]Aluno desmatriculado dos cursos automaticamente.[/dim]")
+    
+    if Confirm.ask(f"  Confirmar exclusão de [red]{aluno.nome}[/red] ({aluno.matricula})?"):
+        alunos.remove(aluno)
+        console.print(f"  ✅ [green]Aluno excluído com sucesso![/green]")
+    else:
+        console.print("  ⚪ [dim]Operação cancelada.[/dim]")
+
+# ============================================================================
+# CRUD CURSO
+# ============================================================================
+
+def criar_curso(professores: list[Professor]) -> Curso | None:
     if not professores:
         console.print("  ⚠️ [yellow]Nenhum professor cadastrado. Cadastre um primeiro![/yellow]")
         return None
-    console.print(Panel("📚 [bold]Novo Curso[/bold]", border_style="magenta"))
+    console.print(Panel("➕ [bold]Novo Curso[/bold]", border_style="magenta"))
     table = Table(title="Professores Disponíveis", show_lines=True)
     table.add_column("#", style="dim")
     table.add_column("Nome")
@@ -108,6 +306,96 @@ def cadastrar_curso(professores: list[Professor]):
     GerenciadorCursos.adicionar_curso(curso)
     console.print(f"  ✅ [green]Curso '{curso.nome}' cadastrado com sucesso![/green]")
     return curso
+
+def listar_cursos():
+    console.print(Panel("👁️ [bold]Cursos Cadastrados[/bold]", border_style="magenta"))
+    cursos = GerenciadorCursos._cursos
+    if not cursos:
+        console.print("  📭 [dim]Nenhum curso cadastrado ainda.[/dim]")
+        return
+    table = Table(show_header=True, header_style="bold magenta", show_lines=True)
+    table.add_column("#", style="dim", width=3)
+    table.add_column("Código", style="cyan")
+    table.add_column("Curso")
+    table.add_column("Carga")
+    table.add_column("Professor")
+    table.add_column("Alunos", justify="right")
+    for i, curso in enumerate(cursos, 1):
+        table.add_row(
+            str(i),
+            curso.codigo,
+            curso.nome,
+            f"{curso.carga_horaria}h",
+            curso.professor.nome,
+            str(len(curso.alunos))
+        )
+    console.print(table)
+
+def editar_curso(professores: list[Professor]):
+    cursos = GerenciadorCursos._cursos
+    if not cursos:
+        console.print("  ⚠️ [yellow]Nenhum curso cadastrado.[/yellow]")
+        return
+    listar_cursos()
+    idx = IntPrompt.ask("  Selecione o curso para editar", default=1) - 1
+    if not (0 <= idx < len(cursos)):
+        console.print("  ❌ [red]Curso inválido[/red]")
+        return
+    curso = cursos[idx]
+    console.print(Panel(f"✏️ [bold]Editar: {curso.nome} ({curso.codigo})[/bold]", border_style="yellow"))
+    
+    # Selecionar novo professor
+    console.print("\n[bold]Professores disponíveis:[/bold]")
+    table = Table(show_lines=True)
+    table.add_column("#", style="dim")
+    table.add_column("Nome")
+    table.add_column("Especialidade")
+    for i, p in enumerate(professores, 1):
+        table.add_row(str(i), p.nome, p.especialidade)
+    console.print(table)
+    idx_prof = IntPrompt.ask("  Selecione o professor", default=1) - 1
+    if not (0 <= idx_prof < len(professores)):
+        console.print("  ❌ [red]Professor inválido[/red]")
+        return
+    
+    novo_nome = Prompt.ask("  Nome do curso", default=curso.nome)
+    nova_carga = IntPrompt.ask("  Carga horária (horas)", default=curso.carga_horaria)
+    
+    curso.nome = novo_nome
+    curso.carga_horaria = nova_carga
+    curso.professor = professores[idx_prof]
+    console.print(f"  ✅ [green]Curso atualizado com sucesso![/green]")
+
+def excluir_curso():
+    cursos = GerenciadorCursos._cursos
+    if not cursos:
+        console.print("  ⚠️ [yellow]Nenhum curso cadastrado.[/yellow]")
+        return
+    listar_cursos()
+    idx = IntPrompt.ask("  Selecione o curso para excluir", default=1) - 1
+    if not (0 <= idx < len(cursos)):
+        console.print("  ❌ [red]Curso inválido[/red]")
+        return
+    curso = cursos[idx]
+    
+    if curso.alunos:
+        console.print(f"  ⚠️ [yellow]Curso possui {len(curso.alunos)} aluno(s) matriculado(s).[/yellow]")
+        if not Confirm.ask("  Deseja excluir mesmo assim? (alunos serão desmatriculados)"):
+            console.print("  ⚪ [dim]Operação cancelada.[/dim]")
+            return
+        # Desmatricular todos automaticamente
+        curso.alunos.clear()
+        console.print("  📝 [dim]Todos os alunos foram desmatriculados automaticamente.[/dim]")
+    
+    if Confirm.ask(f"  Confirmar exclusão de [red]{curso.nome}[/red] ({curso.codigo})?"):
+        GerenciadorCursos._cursos.remove(curso)
+        console.print(f"  ✅ [green]Curso excluído com sucesso![/green]")
+    else:
+        console.print("  ⚪ [dim]Operação cancelada.[/dim]")
+
+# ============================================================================
+# OPERAÇÕES DE MATRÍCULA E NOTAS
+# ============================================================================
 
 def matricular_aluno(alunos: list[Aluno]):
     cursos = GerenciadorCursos._cursos
@@ -204,28 +492,16 @@ def adicionar_nota():
     except ValueError as e:
         console.print(f"  ❌ [red]Erro: {e}[/red]")
 
-def listar_cursos():
-    console.print(Panel("🔍 [bold]Cursos Cadastrados[/bold]", border_style="cyan"))
-    cursos = GerenciadorCursos._cursos
-    if not cursos:
-        console.print("  📭 [dim]Nenhum curso cadastrado ainda.[/dim]")
-        return
-    table = Table(title="Catálogo de Cursos", show_header=True, header_style="bold cyan")
-    table.add_column("Código", style="dim")
-    table.add_column("Curso")
-    table.add_column("Carga")
-    table.add_column("Professor")
-    table.add_column("Alunos", justify="right")
-    for curso in cursos:
-        table.add_row(curso.codigo, curso.nome, f"{curso.carga_horaria}h", curso.professor.nome, str(len(curso.alunos)))
-    console.print(table)
-
 def gerar_relatorio():
     console.print(Panel("📈 [bold]Relatório de Turmas[/bold]", border_style="magenta"))
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console, transient=True) as progress:
         progress.add_task("Gerando relatório...", total=None)
         relatorio = GerenciadorCursos.gerar_relatorio_turmas()
     console.print(Markdown(relatorio))
+
+# ============================================================================
+# MAIN
+# ============================================================================
 
 def main():
     # 1. Carregar dados existentes
@@ -234,39 +510,87 @@ def main():
     
     # 2. Extrair listas para o menu
     professores, alunos = extrair_listas_unicas()
+    cursos = GerenciadorCursos._cursos
     
     while True:
         limpar_tela()
         exibir_cabecalho()
         opcao = menu_principal()
         
-        if opcao == 1:
-            cadastrar_professor(professores)
-        elif opcao == 2:
-            cadastrar_aluno(alunos)
-        elif opcao == 3:
-            cadastrar_curso(professores)
+        if opcao == 1:  # Gerenciar Professores
+            while True:
+                limpar_tela()
+                sub_opcao = menu_professores(professores)
+                if sub_opcao == 1:
+                    criar_professor(professores)
+                elif sub_opcao == 2:
+                    listar_professores(professores)
+                elif sub_opcao == 3:
+                    editar_professor(professores)
+                elif sub_opcao == 4:
+                    excluir_professor(professores, cursos)
+                elif sub_opcao == 5:
+                    break
+                voltar_ao_menu()
+                
+        elif opcao == 2:  # Gerenciar Alunos
+            while True:
+                limpar_tela()
+                sub_opcao = menu_alunos(alunos)
+                if sub_opcao == 1:
+                    criar_aluno(alunos)
+                elif sub_opcao == 2:
+                    listar_alunos(alunos)
+                elif sub_opcao == 3:
+                    editar_aluno(alunos)
+                elif sub_opcao == 4:
+                    excluir_aluno(alunos, cursos)
+                elif sub_opcao == 5:
+                    break
+                voltar_ao_menu()
+                
+        elif opcao == 3:  # Gerenciar Cursos
+            while True:
+                limpar_tela()
+                sub_opcao = menu_cursos()
+                if sub_opcao == 1:
+                    criar_curso(professores)
+                elif sub_opcao == 2:
+                    listar_cursos()
+                elif sub_opcao == 3:
+                    editar_curso(professores)
+                elif sub_opcao == 4:
+                    excluir_curso()
+                elif sub_opcao == 5:
+                    break
+                voltar_ao_menu()
+                
         elif opcao == 4:
             matricular_aluno(alunos)
+            voltar_ao_menu()
         elif opcao == 5:
             desmatricular_aluno()
+            voltar_ao_menu()
         elif opcao == 6:
             adicionar_nota()
+            voltar_ao_menu()
         elif opcao == 7:
             listar_cursos()
+            voltar_ao_menu()
         elif opcao == 8:
             gerar_relatorio()
+            voltar_ao_menu()
         elif opcao == 9:
             caminho = GerenciadorCursos.salvar_dados()
             console.print(f"💾 [green]Dados salvos em: {caminho}[/green]")
+            voltar_ao_menu()
         elif opcao == 10:
             caminho = GerenciadorCursos.salvar_dados()
             console.print(Panel(f"\n[bold green]👋 Dados salvos em: {caminho}\nObrigado por usar o Sistema de Cursos![/bold green]\n", border_style="green"))
             break
         else:
             console.print("  ❌ [red]Opção inválida. Tente novamente.[/red]")
-        
-        Prompt.ask("\n[dim]Pressione Enter para continuar[/dim]")
+            voltar_ao_menu()
 
 if __name__ == "__main__":
     main()
