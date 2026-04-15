@@ -41,3 +41,129 @@ pip-delete-this-directory.txt
 
 # Pytest
 .pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# =============================================================================
+# 📊 DADOS DO PROJETO (NÃO SUBIR DADOS DE TESTE)
+# =============================================================================
+# Arquivos de persistência JSON/CSV
+dados_cursos.json
+relatorio_cursos.csv
+*.json
+*.csv
+
+# Logs e backups
+*.log
+*.bak
+*~
+
+# =============================================================================
+# 💻 IDEs & EDITORES
+# =============================================================================
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.*.swp
+
+# =============================================================================
+# 🖥️ SISTEMA OPERACIONAL
+# =============================================================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.fuse_hidden*
+.Trash-*
+.nfs*
+
+# =============================================================================
+# 📦 AMBIENTE & CONFIGURAÇÕES
+# =============================================================================
+# Variáveis de ambiente (.env nunca deve ser versionado!)
+.env
+.env.local
+.env.*.local
+
+# Configurações locais específicas do desenvolvedor
+config.local.py
+settings.local.py
+*.local
+
+# =============================================================================
+# 📝 DOCUMENTAÇÃO & BUILD
+# =============================================================================
+# Sphinx documentation
+docs/_build/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff / Black
+.ruff_cache/
+
+# =============================================================================
+# 🔒 SEGURANÇA (NUNCA SUBA ISSO!)
+# =============================================================================
+# Chaves privadas e credenciais
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Histórico de banco de dados (se houver)
+*.db
+*.sqlite
+*.sqlite3
+
+# =============================================================================
+# 🎯 ESPECÍFICOS DO SEU PROJETO
+# =============================================================================
+# Arquivos temporários do terminal
+*.tmp
+temp/
+tmp/
+
+# exports e relatórios gerados
+export_*.csv
+relatorio_*.csv
+backup_*.json
