@@ -31,5 +31,33 @@
         }
       ]
     }
+  ],
+  "professores": [
+    {
+      "nome": "Ana Silva",
+      "email": "ana@escola.com",
+      "especialidade": "Python & Dados",
+      "disciplinas": []
+    }
+  ],
+  "alunos": [
+    {
+      "nome": "Carlos Souza",
+      "email": "carlos@aluno.com",
+      "matricula": "M1000",
+      "notas": [
+        5.5,
+        6.5
+      ]
+    },
+    {
+      "nome": "Luiza Souza",
+      "email": "luiza@aluno.com",
+      "matricula": "M1001",
+      "notas": [
+        7.9,
+        2.5
+      ]
+    }
   ]
 }

@@ -7,7 +7,6 @@ class Aluno(Pessoa):
         super().__init__(nome, email)
         if matricula:
             self.matricula = matricula
-            # Atualiza o contador baseado na matrícula carregada
             try:
                 num = int(matricula.replace("M", ""))
                 if num >= Aluno._contador_matricula:
@@ -17,7 +16,7 @@ class Aluno(Pessoa):
         else:
             self.matricula = f"M{Aluno._contador_matricula}"
             Aluno._contador_matricula += 1
-        self.notas: list[float] = []
+        self.notas: list[float] = []  # ✅ Lista de notas
 
     def adicionar_nota(self, nota: float):
         if not 0 <= nota <= 10:
@@ -29,12 +28,17 @@ class Aluno(Pessoa):
 
     def to_dict(self) -> dict:
         d = super().to_dict()
-        d.update({"matricula": self.matricula, "notas": self.notas})
+        d.update({
+            "matricula": self.matricula,
+            "notas": self.notas  # ✅ Notas incluídas no dict
+        })
         return d
 
     @classmethod
     def from_dict(cls, dados: dict):
-        return cls(dados["nome"], dados["email"], matricula=dados["matricula"])
+        aluno = cls(dados["nome"], dados["email"], matricula=dados["matricula"])
+        aluno.notas = dados.get("notas", [])  # ✅ Notas restauradas
+        return aluno
 
     def __str__(self):
         return f"[{self.matricula}] {super().__str__()} | Média: {self.calcular_media():.1f}"
