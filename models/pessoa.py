@@ -18,8 +18,8 @@ class Pessoa:
         return {"nome": self.nome, "email": self.email}
 
     @classmethod
-    def from_dict(cls, data: dict):
-        return cls(data["nome"], data["email"])
+    def from_dict(cls, dados: dict):
+        return cls(dados["nome"], dados["email"])
 
     def __str__(self):
         return f"{self.nome} <{self.email}>"

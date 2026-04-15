@@ -61,13 +61,38 @@ class GerenciadorCursos:
         with open(path, "r", encoding="utf-8") as f:
             dados = json.load(f)
         cls._cursos = [Curso.from_dict(c) for c in dados.get("cursos", [])]
+        
+        # 🔥 Sincronizar contador de matrículas após carregar
+        cls._sincronizar_contador_matriculas()
+        
         return True
-    
+
+    @classmethod
+    def _sincronizar_contador_matriculas(cls):
+        """
+        Percorre todos os alunos em todos os cursos e atualiza o contador
+        para garantir que a próxima matrícula seja única.
+        """
+        from models.aluno import Aluno
+        
+        maior_matricula = 1000  # Valor inicial padrão
+        
+        for curso in cls._cursos:
+            for aluno in curso.alunos:
+                try:
+                    num = int(aluno.matricula.replace("M", ""))
+                    if num >= maior_matricula:
+                        maior_matricula = num
+                except (ValueError, AttributeError):
+                    pass
+        
+        # Define o contador como o maior valor encontrado + 1
+        Aluno._contador_matricula = maior_matricula + 1
+
     @classmethod
     def exportar_relatorio_csv(cls, caminho: str = None) -> str:
         """
         Exporta relatório completo de cursos, alunos e notas para CSV.
-        Cada linha representa um aluno em um curso com suas notas.
         """
         path = caminho or cls.ARQUIVO_CSV
         
@@ -75,7 +100,7 @@ class GerenciadorCursos:
             raise ValueError("Nenhum curso cadastrado para exportar.")
         
         with open(path, "w", newline="", encoding="utf-8-sig") as f:
-            writer = csv.writer(f, delimiter=";")  # Ponto e vírgula para compatibilidade com Excel BR
+            writer = csv.writer(f, delimiter=";")
             
             # Cabeçalho
             writer.writerow([
@@ -90,7 +115,7 @@ class GerenciadorCursos:
                 "Notas (separadas por vírgula)",
                 "Quantidade de Notas",
                 "Média Final",
-                "Situação"  # Aprovado/Reprovado baseado na média
+                "Situação"
             ])
             
             # Dados
@@ -115,7 +140,6 @@ class GerenciadorCursos:
                             situacao
                         ])
                 else:
-                    # Curso sem alunos - ainda assim exportar
                     writer.writerow([
                         curso.codigo,
                         curso.nome,

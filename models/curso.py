@@ -33,10 +33,10 @@ class Curso:
         }
 
     @classmethod
-    def from_dict(cls, data: dict):
-        prof = Professor.from_dict(data["professor"])
-        curso = cls(data["codigo"], data["nome"], data["carga_horaria"], prof)
-        curso.alunos = [Aluno.from_dict(a_data) for a_data in data.get("alunos", [])]
+    def from_dict(cls, dados: dict):
+        prof = Professor.from_dict(dados["professor"])
+        curso = cls(dados["codigo"], dados["nome"], dados["carga_horaria"], prof)
+        curso.alunos = [Aluno.from_dict(a_data) for a_data in dados.get("alunos", [])]
         return curso
 
     def __str__(self):

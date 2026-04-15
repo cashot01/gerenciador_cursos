@@ -17,8 +17,8 @@ class Professor(Pessoa):
         return d
 
     @classmethod
-    def from_dict(cls, data: dict):
-        return cls(data["nome"], data["email"], data["especialidade"])
+    def from_dict(cls, dados: dict):
+        return cls(dados["nome"], dados["email"], dados["especialidade"])
 
     def __str__(self):
         return f"Prof. {self.nome} | Esp: {self.especialidade}"

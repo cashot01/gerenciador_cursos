@@ -13,7 +13,7 @@
       "alunos": [
         {
           "nome": "Carlos Souza",
-          "email": "carlos@email.com",
+          "email": "carlos@aluno.com",
           "matricula": "M1000",
           "notas": [
             5.5,
@@ -23,7 +23,7 @@
         {
           "nome": "Luiza Souza",
           "email": "luiza@aluno.com",
-          "matricula": "M1000",
+          "matricula": "M1001",
           "notas": [
             7.9,
             2.5

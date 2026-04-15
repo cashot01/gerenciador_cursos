@@ -7,6 +7,13 @@ class Aluno(Pessoa):
         super().__init__(nome, email)
         if matricula:
             self.matricula = matricula
+            # Atualiza o contador baseado na matrícula carregada
+            try:
+                num = int(matricula.replace("M", ""))
+                if num >= Aluno._contador_matricula:
+                    Aluno._contador_matricula = num + 1
+            except ValueError:
+                pass
         else:
             self.matricula = f"M{Aluno._contador_matricula}"
             Aluno._contador_matricula += 1
@@ -26,9 +33,8 @@ class Aluno(Pessoa):
         return d
 
     @classmethod
-    def from_dict(cls, data: dict):
-        # Recria sem incrementar o contador automaticamente
-        return cls(data["nome"], data["email"], matricula=data["matricula"])
+    def from_dict(cls, dados: dict):
+        return cls(dados["nome"], dados["email"], matricula=dados["matricula"])
 
     def __str__(self):
         return f"[{self.matricula}] {super().__str__()} | Média: {self.calcular_media():.1f}"
