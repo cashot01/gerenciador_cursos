@@ -10,9 +10,12 @@ class Pessoa:
 
     @email.setter
     def email(self, valor: str):
-        if "@" not in valor or "." not in valor:
+        # ✅ Remove espaços em branco antes de validar
+        valor_limpo = valor.strip()
+        
+        if "@" not in valor_limpo or "." not in valor_limpo:
             raise ValueError("Email inválido. Ex: nome@dominio.com")
-        self._email = valor.lower()
+        self._email = valor_limpo.lower()  # ✅ Usa o valor limpo
 
     def to_dict(self) -> dict:
         return {"nome": self.nome, "email": self.email}

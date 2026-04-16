@@ -147,6 +147,64 @@ classDiagram
 
 ---
 
+## 🧪 Testes Unitários
+
+O projeto segue boas práticas de engenharia de software com testes unitários abrangentes cobrindo modelos de dados, regras de negócio e interface de usuário.
+
+### Executar todos os testes
+```bash
+pytest tests/ -v
+```
+
+### Executar com cobertura de código
+```bash
+pytest tests/ --cov=. --cov-report=html
+start htmlcov\index.html  # Windows
+open htmlcov/index.html   # macOS/Linux
+```
+
+### Cobertura atual
+| Módulo | Cobertura |
+|--------|-----------|
+| models/pessoa.py | 100% |
+| models/aluno.py | 100% |
+| models/professor.py | 100% |
+| models/curso.py | 100% |
+| services/gerenciador.py | 95% |
+
+### Estrutura de testes
+```
+tests/
+├── test_pessoa.py        # Validação de email, to_dict, from_dict
+├── test_aluno.py         # Matrícula, notas, média, persistência
+├── test_professor.py     # Especialidade, disciplinas, serialização
+├── test_curso.py         # Matrícula, desmatrícula, vínculos, JSON
+├── test_gerenciador.py   # CRUD, persistência JSON, exportação CSV
+└── test_views.py         # Interface CLI, mocks de input, validações
+```
+
+### 🧠 O Que É Testado
+✅ Models (Camada de Dados)
+Validação de email (formato, normalização para minúsculo, strip de espaços)
+Geração automática e sequencial de matrículas
+Cálculo de médias com e sem notas
+Serialização (to_dict) e Desserialização (from_dict)
+Herança e polimorfismo entre classes
+
+✅ Services (Camada de Regras de Negócio)
+CRUD completo de professores, alunos e cursos
+Persistência em JSON (salvar e carregar com integridade)
+Exportação para CSV com formatação correta
+Buscas por matrícula e código
+Prevenção de duplicatas (email para professor, matrícula para aluno)
+
+✅ Views (Camada de Interface)
+Mock de inputs do usuário (Prompt.ask, Confirm.ask, IntPrompt, FloatPrompt)
+Validação de fluxos de erro (índices inválidos, listas vazias)
+Confirmações de exclusão (Sim/Não)
+Integração com componentes Rich (Panel, Table, Console)
+Tratamento de edge cases (email com espaços, notas fora do intervalo)
+
 ## 📄 Licença
 Distribuído sob a licença **MIT**. Veja `LICENSE` para mais detalhes.
 
